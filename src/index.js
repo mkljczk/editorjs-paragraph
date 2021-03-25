@@ -64,6 +64,7 @@ class Paragraph {
     this._data = {};
     this._element = this.drawView();
     this._preserveBlank = config.preserveBlank !== undefined ? config.preserveBlank : false;
+    this.speakableButton;
 
     this.data = data;
   }
@@ -115,6 +116,57 @@ class Paragraph {
     return this._element;
   }
 
+  renderSettings() {
+    const holder = document.createElement('DIV');
+
+    const speakableButton = document.createElement('SPAN');
+
+    speakableButton.classList.add('ce-settings__button');
+
+    /**
+     * Highlight current level button
+     */
+    if (this.data.speakable) {
+      speakableButton.classList.add('ce-inline-tool--focused');
+    }
+
+    /**
+     * Add SVG icon
+     */
+    speakableButton.innerHTML = '🎙️';
+
+    /**
+     * Set up click handler
+     */
+    speakableButton.addEventListener('click', () => {
+      this.setSpeakable(!this.speakable);
+    });
+
+    /**
+     * Append settings button to holder
+     */
+    holder.appendChild(speakableButton);
+
+    /**
+     * Save settings buttons
+     */
+    this.speakableButton = speakableButton;
+
+    return holder;
+  }
+
+  setSpeakable(value) {
+    this.data = {
+      speakable: value,
+      ...this.data,
+    };
+
+    if (value) this.speakableButton.classList.add('ce-inline-tool--focused');
+    else {
+      this.speakableButton.classList.remove('ce-inline-tool--focused');
+    }
+  }
+
   /**
    * Method that specified how to merge two Text blocks.
    * Called by Editor.js by backspace at the beginning of the Block
@@ -123,7 +175,8 @@ class Paragraph {
    */
   merge(data) {
     let newData = {
-      text : this.data.text + data.text
+      text : this.data.text + data.text,
+      speakable: this.data.speakable,
     };
 
     this.data = newData;
@@ -153,7 +206,8 @@ class Paragraph {
    */
   save(toolsContent) {
     return {
-      text: toolsContent.innerHTML
+      text: toolsContent.innerHTML,
+      speakable: this.data.speakable,
     };
   }
 
